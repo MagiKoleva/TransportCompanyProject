@@ -24,4 +24,13 @@ public class Company extends BaseEntity {
 
     @OneToMany(mappedBy = "company")
     private Set<Client> clients;
+
+    @OneToMany(mappedBy = "company")
+    private Set<Vehicle> vehicles;
+
+    @OneToMany(mappedBy = "company")
+    private Set<Employee> employees;
+
+    @OneToMany(mappedBy = "company")
+    private Set<Trip> trips;
 }

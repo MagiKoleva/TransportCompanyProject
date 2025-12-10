@@ -4,8 +4,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
-import org.project.entity.Client;
-import org.project.entity.Company;
+import org.project.entity.*;
 
 public class SessionFactoryUtil {
 
@@ -16,6 +15,10 @@ public class SessionFactoryUtil {
             Configuration configuration = new Configuration();
             configuration.addAnnotatedClass(Company.class);
             configuration.addAnnotatedClass(Client.class);
+            configuration.addAnnotatedClass(Vehicle.class);
+            configuration.addAnnotatedClass(Employee.class);
+            configuration.addAnnotatedClass(Qualification.class);
+            configuration.addAnnotatedClass(Trip.class);
 
             ServiceRegistry serviceRegistry
                     = new StandardServiceRegistryBuilder()
