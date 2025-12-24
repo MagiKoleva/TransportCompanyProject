@@ -1,9 +1,6 @@
 package org.project.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -16,6 +13,9 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @ToString(callSuper = true)
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "dType", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorValue("trip")
 public class Trip extends BaseEntity{
     @Column(name = "start_location")
     private String startLoc;

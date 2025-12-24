@@ -19,6 +19,8 @@ public class SessionFactoryUtil {
             configuration.addAnnotatedClass(Employee.class);
             configuration.addAnnotatedClass(Qualification.class);
             configuration.addAnnotatedClass(Trip.class);
+            configuration.addAnnotatedClass(CargoTrip.class);
+            configuration.addAnnotatedClass(PassengerTrip.class);
 
             ServiceRegistry serviceRegistry
                     = new StandardServiceRegistryBuilder()
