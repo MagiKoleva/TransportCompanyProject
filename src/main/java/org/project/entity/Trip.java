@@ -47,6 +47,6 @@ public class Trip extends BaseEntity{
     @ManyToOne
     private Client client;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Qualification qualification;
 }
