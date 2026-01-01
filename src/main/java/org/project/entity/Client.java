@@ -2,18 +2,19 @@ package org.project.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Set;
 
 @Entity
 @Table(name = "client")
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @ToString(callSuper = true)
+@Builder
 public class Client extends BaseEntity {
 
     @Column(name = "name")
@@ -28,9 +29,16 @@ public class Client extends BaseEntity {
     private BigDecimal resources;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = true)
     private Company company;
 
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
     @ToString.Exclude
     private Set<Trip> trips;
+
+    //helper method to add the client to the company's Set of clients
+    public void assignCompany(Company company) {
+        this.company = company;
+        company.getClients().add(this);
+    }
 }

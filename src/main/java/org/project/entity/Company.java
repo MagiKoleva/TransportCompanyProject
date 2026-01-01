@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -31,7 +32,8 @@ public class Company extends BaseEntity {
 
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     @ToString.Exclude
-    private Set<Client> clients;
+    @Builder.Default
+    private Set<Client> clients = new HashSet<>();
 
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     @ToString.Exclude

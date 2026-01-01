@@ -5,6 +5,7 @@ import org.hibernate.Transaction;
 import org.project.configuration.SessionFactoryUtil;
 import org.project.dto.CompanyDto;
 import org.project.entity.Company;
+import org.project.exceptions.EntityNotFoundException;
 
 import java.util.List;
 
@@ -51,6 +52,12 @@ public class CompanyDao {
             Transaction transaction = session.beginTransaction();
 
             Company company1 = session.find(Company.class, id);
+
+            if (company1 == null) {
+                transaction.rollback();
+                throw new EntityNotFoundException("Company", id);
+            }
+
             company1.setName(company.getName());
             company1.setAddress(company.getAddress());
 
@@ -63,6 +70,12 @@ public class CompanyDao {
         try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
             Company company = session.find(Company.class, id);
+
+            if (company == null) {
+                transaction.rollback();
+                throw new EntityNotFoundException("Company", id);
+            }
+
             session.remove(company);
             transaction.commit();
         }
