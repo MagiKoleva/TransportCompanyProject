@@ -50,7 +50,7 @@ public class ClientDao {
         }
     }
 
-    public static void updateClient(long id, Client company) {
+    public static void updateClient(long id, Client client) {
         try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
 
@@ -61,8 +61,8 @@ public class ClientDao {
                 throw new EntityNotFoundException("Client", id);
             }
 
-            client1.setName(company.getName());
-            client1.setResources(company.getResources());
+            client1.setName(client.getName());
+            client1.setResources(client.getResources());
 
             session.persist(client1);
             transaction.commit();

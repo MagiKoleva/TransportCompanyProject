@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -34,7 +35,8 @@ public class Client extends BaseEntity {
 
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
     @ToString.Exclude
-    private Set<Trip> trips;
+    @Builder.Default
+    private Set<Trip> trips = new HashSet<>();
 
     //helper method to add the client to the company's Set of clients
     public void assignCompany(Company company) {

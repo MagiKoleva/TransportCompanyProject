@@ -51,22 +51,27 @@ public class Trip extends BaseEntity {
     private boolean isPaid;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employee_id")
     @ToString.Exclude
     private Employee employee;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vehicle_id")
     @ToString.Exclude
     private Vehicle vehicle;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
     @ToString.Exclude
     private Company company;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id")
     @ToString.Exclude
     private Client client;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "qualification_id")
     @ToString.Exclude
     private Qualification qualification;
 }

@@ -2,18 +2,20 @@ package org.project.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "employee")
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @ToString(callSuper = true)
+@Builder
 public class Employee extends BaseEntity {
 
     @Column(name = "first_name")
@@ -33,13 +35,21 @@ public class Employee extends BaseEntity {
     private BigDecimal salary;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = true)
     private Company company;
 
     @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "employee_has_qualification",
+            joinColumns = @JoinColumn(name = "employee_id"),
+            inverseJoinColumns = @JoinColumn(name = "qualification_id")
+    )
     @ToString.Exclude
-    private Set<Qualification> qualifications;
+    @Builder.Default
+    private Set<Qualification> qualifications = new HashSet<>();
 
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
     @ToString.Exclude
-    private Set<Trip> trips;
+    @Builder.Default
+    private Set<Trip> trips = new HashSet<>();
 }

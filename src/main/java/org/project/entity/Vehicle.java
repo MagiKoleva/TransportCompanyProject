@@ -5,19 +5,21 @@ import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.project.validator.ValidVehicleCapacity;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "vehicle")
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @ToString(callSuper = true)
+@Builder
 @ValidVehicleCapacity
 public class Vehicle extends BaseEntity {
 
@@ -37,9 +39,11 @@ public class Vehicle extends BaseEntity {
     private BigDecimal capacity;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
     @OneToMany(mappedBy = "vehicle", fetch = FetchType.LAZY)
     @ToString.Exclude
-    private Set<Trip> trips;
+    @Builder.Default
+    private Set<Trip> trips = new HashSet<>();
 }

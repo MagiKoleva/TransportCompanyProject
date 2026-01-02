@@ -37,13 +37,30 @@ public class Company extends BaseEntity {
 
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     @ToString.Exclude
-    private Set<Vehicle> vehicles;
+    @Builder.Default
+    private Set<Vehicle> vehicles = new HashSet<>();
 
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     @ToString.Exclude
-    private Set<Employee> employees;
+    @Builder.Default
+    private Set<Employee> employees = new HashSet<>();
 
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     @ToString.Exclude
-    private Set<Trip> trips;
+    @Builder.Default
+    private Set<Trip> trips = new HashSet<>();
+
+    public void addVehicle(Vehicle vehicle) {
+//        if (vehicle.getCompany() != null && vehicle.getCompany() != this) {
+//            vehicle.getCompany().getVehicles().remove(vehicle);
+//        }
+
+        vehicles.add(vehicle);
+        vehicle.setCompany(this);
+    }
+
+    public void hireEmployee(Employee employee) {
+        employees.add(employee);
+        employee.setCompany(this);
+    }
 }
