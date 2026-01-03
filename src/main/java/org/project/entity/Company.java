@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.project.exceptions.EntityAlreadyConnectedException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -48,12 +49,13 @@ public class Company extends BaseEntity {
     @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     @ToString.Exclude
     @Builder.Default
+    @Setter(AccessLevel.NONE)
     private Set<Trip> trips = new HashSet<>();
 
     public void addVehicle(Vehicle vehicle) {
-//        if (vehicle.getCompany() != null && vehicle.getCompany() != this) {
-//            vehicle.getCompany().getVehicles().remove(vehicle);
-//        }
+        if (vehicle.getCompany() != null && vehicle.getCompany() != this) {
+            throw new EntityAlreadyConnectedException("Vehicle" , vehicle.getId(), "Company", this.getId());
+        }
 
         vehicles.add(vehicle);
         vehicle.setCompany(this);

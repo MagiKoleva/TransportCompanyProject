@@ -36,6 +36,7 @@ public class Client extends BaseEntity {
     @OneToMany(mappedBy = "client", fetch = FetchType.LAZY)
     @ToString.Exclude
     @Builder.Default
+    @Setter(AccessLevel.NONE)
     private Set<Trip> trips = new HashSet<>();
 
     //helper method to add the client to the company's Set of clients

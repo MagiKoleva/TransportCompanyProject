@@ -34,4 +34,11 @@ public class CargoTrip extends Trip {
     @DecimalMax(value = "100.00", message = "Percentage cannot be more than 100.00%!")
     @Digits(integer = 3, fraction = 2, message = "Percentage must have up to 3 digits and 2 decimals!")
     private BigDecimal percent;
+
+    @Override
+    public BigDecimal calculateFinalPrice() {
+        return getPrice().add(
+                getPrice().multiply(percent).divide(BigDecimal.valueOf(100))
+        );
+    }
 }

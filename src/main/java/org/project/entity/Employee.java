@@ -51,5 +51,6 @@ public class Employee extends BaseEntity {
     @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
     @ToString.Exclude
     @Builder.Default
+    @Setter(AccessLevel.NONE)
     private Set<Trip> trips = new HashSet<>();
 }

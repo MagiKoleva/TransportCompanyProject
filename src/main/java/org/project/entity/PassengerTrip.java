@@ -32,4 +32,14 @@ public class PassengerTrip extends Trip {
     @Column(name = "max_number_until_increment")
     @NotNull(message = "Number until increment must be provided!")
     private int maxNumber;
+
+    @Override
+    public BigDecimal calculateFinalPrice() {
+        if (number > maxNumber) {
+            return getPrice().add(
+                    pricePerPerson.multiply(BigDecimal.valueOf(number - maxNumber))
+            );
+        }
+        return getPrice();
+    }
 }

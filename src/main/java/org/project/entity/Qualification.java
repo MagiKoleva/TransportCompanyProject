@@ -28,5 +28,6 @@ public class Qualification extends BaseEntity {
 
     @OneToMany(mappedBy = "qualification",  fetch = FetchType.LAZY)
     @ToString.Exclude
+    @Setter(AccessLevel.NONE)
     private Set<Trip> trips;
 }

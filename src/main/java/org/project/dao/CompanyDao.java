@@ -4,9 +4,14 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.project.configuration.SessionFactoryUtil;
 import org.project.dto.CompanyDto;
+import org.project.dto.CompanyIncomeDto;
 import org.project.entity.Company;
+import org.project.entity.Employee;
+import org.project.entity.Trip;
 import org.project.exceptions.EntityNotFoundException;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 
 public class CompanyDao {
@@ -79,5 +84,38 @@ public class CompanyDao {
             session.remove(company);
             transaction.commit();
         }
+    }
+
+    public static List<CompanyDto> filterAndSortCompaniesByName(String text) {
+        return getCompaniesDto().stream()
+                .filter(c -> text == null || text.isBlank()
+                        || c.getName().toLowerCase().contains(text.toLowerCase())
+                )
+                .sorted(Comparator.comparing(CompanyDto::getName))
+                .map(c -> new CompanyDto(c.getName(), c.getAddress()))
+                .toList();
+    }
+
+    public static List<CompanyIncomeDto> filterCompaniesByMinIncomeAndSortDescOrder(BigDecimal minIncome) {
+        return getCompanies().stream()
+                .map(c -> {
+                    BigDecimal paidTripsIncome = c.getTrips().stream()
+                            .filter(Trip::isPaid)
+                            .map(Trip::calculateFinalPrice)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    BigDecimal salaries = c.getEmployees().stream()
+                            .map(Employee::getSalary)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    BigDecimal income = paidTripsIncome.subtract(salaries);
+
+                    return new CompanyIncomeDto(c.getName(), income);
+                })
+                .filter(dto -> minIncome == null
+                            || dto.getIncome().compareTo(minIncome) >= 0
+                )
+                .sorted(Comparator.comparing(CompanyIncomeDto::getIncome).reversed())
+                .toList();
     }
 }
