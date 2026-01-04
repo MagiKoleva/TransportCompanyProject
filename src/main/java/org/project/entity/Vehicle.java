@@ -29,7 +29,7 @@ public class Vehicle extends BaseEntity {
             message = "Value must be the following format: AB1234CD!")
     private String licensePlate;
 
-    @NotBlank(message = "Vehicle type must be provided!")
+    //@NotBlank(message = "Vehicle type must be provided!")
     @Enumerated(EnumType.STRING)
     private VehicleType type;
 

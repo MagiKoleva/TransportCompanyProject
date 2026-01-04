@@ -7,13 +7,12 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
-import java.util.Set;
 
 @AllArgsConstructor
 @Getter
 @Setter
 @ToString
-public class EmployeeDto {
+public class EmployeeSalaryDto {
 
     @NotBlank(message = "Employee first name cannot be blank!")
     @Pattern(regexp = "^([A-Z]).*", message = "Employee first name has to start with a capital letter!")
@@ -23,11 +22,8 @@ public class EmployeeDto {
     @Pattern(regexp = "^([A-Z]).*", message = "Employee last name has to start with a capital letter!")
     private String lastName;
 
-//    @NotBlank(message = "Qualification must be specified!")
-//    private Set<String> qualifications;
-//
-//    @NotNull(message = "Employee must have a salary!")
-//    @DecimalMin(value = "100.00", message = "Salary cannot be less than 100.00!")
-//    @Digits(integer = 5, fraction = 2, message = "Salary must have up to 5 digits and 2 decimals!")
-//    private BigDecimal salary;
+    @NotNull(message = "Employee must have a salary!")
+    @DecimalMin(value = "100.00", message = "Salary cannot be less than 100.00!")
+    @Digits(integer = 5, fraction = 2, message = "Salary must have up to 5 digits and 2 decimals!")
+    private BigDecimal salary;
 }

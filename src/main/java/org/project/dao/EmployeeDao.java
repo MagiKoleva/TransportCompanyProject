@@ -4,8 +4,13 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.project.configuration.SessionFactoryUtil;
 import org.project.dto.EmployeeDto;
+import org.project.dto.EmployeeIncomeReportDto;
+import org.project.dto.EmployeeSalaryDto;
+import org.project.dto.EmployeeTripCountDto;
+import org.project.entity.Company;
 import org.project.entity.Employee;
 import org.project.entity.Qualification;
+import org.project.entity.Trip;
 import org.project.exceptions.EntityNotFoundException;
 
 import java.math.BigDecimal;
@@ -85,45 +90,69 @@ public class EmployeeDao {
         }
     }
 
-    public static List<EmployeeDto> filterAndSortEmployeesByQualificationAndSalary(
-            String qualification,
-            BigDecimal minSalary,
-            BigDecimal maxSalary,
-            boolean sortBySalary)
-    {
-        // input validation
-        if (minSalary != null && maxSalary != null && minSalary.compareTo(maxSalary) > 0) {
-            throw new IllegalArgumentException("Minimum salary must be less than maximum salary!");
+    public static List<EmployeeDto> filterAndSortEmployeesByQualification(String qName) {
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            return session.createQuery("SELECT new org.project.dto.EmployeeDto(e.fname, e.lname) " +
+            "FROM Employee e JOIN e.qualifications q " +
+                    "WHERE lower(q.name) = lower(:qName) " +
+                    "ORDER BY e.fname ASC, e.lname ASC", EmployeeDto.class)
+                    .setParameter("qName", qName)
+                    .getResultList();
         }
-
-        Comparator<EmployeeDto> comparator;
-        if (sortBySalary) {
-            comparator = Comparator.comparing(EmployeeDto::getSalary).reversed();
-        } else {
-            comparator = Comparator.comparing(dto -> String.join
-                    (",", dto.getQualifications()));
-        }
-
-        return getAllEmployees().stream()
-                .filter(e -> qualification == null ||
-                        e.getQualifications().stream()
-                                .anyMatch(q-> q.getName().equalsIgnoreCase(qualification))
-                )
-                .filter(e -> minSalary == null ||
-                        e.getSalary().compareTo(minSalary) >= 0
-                )
-                .filter(e -> maxSalary == null ||
-                        e.getSalary().compareTo(maxSalary) <= 0
-                )
-                .map(e -> new EmployeeDto(
-                        e.getFname(),
-                        e.getLname(),
-                        e.getQualifications().stream()
-                                .map(Qualification::getName)
-                                .collect(Collectors.toSet()),
-                        e.getSalary()
-                ))
-                .sorted(comparator)
-                .toList();
     }
+
+    public static List<EmployeeSalaryDto> filterAndSortEmployeesBySalaryMinMaxOrBoth(
+                                                BigDecimal minSalary, BigDecimal maxSalary) {
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                    "SELECT new org.project.dto.EmployeeSalaryDto(e.fname, e.lname, e.salary) " +
+                    "FROM Employee e " +
+                    "WHERE (:min IS NULL OR e.salary >= :min) " +
+                    "AND (:max IS NULL OR e.salary <= :max) " +
+                    "ORDER BY e.fname ASC, e.lname ASC", EmployeeSalaryDto.class)
+                    .setParameter("min", minSalary)
+                    .setParameter("max", maxSalary)
+                    .getResultList();
+        }
+    }
+
+    public static List<EmployeeTripCountDto> getEmployeeTripCountByCompany(long companyId) {
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            return session.createQuery(
+                    "SELECT new org.project.dto.EmployeeTripCountDto(e.fname, e.lname, COUNT(t)) "
+                    + "FROM Employee e LEFT JOIN e.trips t "
+                    + "WHERE e.company.id = :companyId "
+                    + "GROUP BY e.id, e.fname, e.lname "
+                    + "ORDER BY COUNT(t) DESC",
+                    EmployeeTripCountDto.class)
+
+                    .setParameter("companyId", companyId)
+                    .getResultList();
+        }
+    }
+
+    public static List<EmployeeIncomeReportDto> getIncomeOfEachEmployeeByCompany(long companyId) {
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+
+            Company company = session.find(Company.class, companyId);
+            if (company == null) throw new EntityNotFoundException("Company", companyId);
+
+            return company.getEmployees().stream()
+                    .map(e -> {
+                        BigDecimal paidSum = e.getTrips().stream()
+                                .filter(Trip::isPaid)
+                                .map(Trip::calculateFinalPrice)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                        BigDecimal unpaidSum = e.getTrips().stream()
+                                .filter(t -> !t.isPaid())
+                                .map(Trip::calculateFinalPrice)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                        return new EmployeeIncomeReportDto(e.getFname(), e.getLname(), paidSum, unpaidSum);
+                    })
+                    .toList();
+        }
+    }
+
 }

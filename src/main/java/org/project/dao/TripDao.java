@@ -175,9 +175,10 @@ public class TripDao {
         }
     }
 
-    public static List<Trip> filterTripsByDestination (String endLoc) {
+    public static List<Trip> filterAndSortTripsByDestination (String endLoc) {
         try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
-            return session.createQuery("SELECT t FROM Trip t WHERE lower(t.endLoc) = lower(:end)",
+            return session.createQuery("SELECT t FROM Trip t WHERE lower(t.endLoc) = lower(:end) " +
+                                    "ORDER BY t.endLoc ASC, t.departure ASC",
                     Trip.class)
                     .setParameter("end", endLoc)
                     .getResultList();
