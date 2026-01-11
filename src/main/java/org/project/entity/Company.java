@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.project.exceptions.EntityAlreadyConnectedException;
 
 import java.util.HashSet;
@@ -17,7 +18,7 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString(callSuper = true)
-@Builder
+@SuperBuilder
 public class Company extends BaseEntity {
 
     @Column(name = "name")

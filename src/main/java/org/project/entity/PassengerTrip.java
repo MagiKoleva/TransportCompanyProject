@@ -5,17 +5,20 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
 @Table(name = "passenger_trip")
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @ToString(callSuper = true)
+@SuperBuilder
 @DiscriminatorValue("passenger")
 public class PassengerTrip extends Trip {
 
@@ -35,11 +38,23 @@ public class PassengerTrip extends Trip {
 
     @Override
     public BigDecimal calculateFinalPrice() {
-        if (number > maxNumber) {
-            return getPrice().add(
-                    pricePerPerson.multiply(BigDecimal.valueOf(number - maxNumber))
-            );
+        BigDecimal result;
+
+        if (number <= maxNumber) {
+            result = getPrice();
+        } else {
+            result = getPrice().add(
+                    pricePerPerson.multiply(BigDecimal.valueOf(number - maxNumber)));
         }
-        return getPrice();
+
+        return result.setScale(2, RoundingMode.HALF_UP);
+
+
+//        if (number > maxNumber) {
+//            return getPrice().add(
+//                    pricePerPerson.multiply(BigDecimal.valueOf(number - maxNumber))
+//            );
+//        }
+//        return getPrice();
     }
 }

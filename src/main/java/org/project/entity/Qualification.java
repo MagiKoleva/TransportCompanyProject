@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,7 +16,7 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString(callSuper = true)
-@Builder
+@SuperBuilder
 public class Qualification extends BaseEntity {
 
     @NotBlank(message = "Qualification must be specified!")

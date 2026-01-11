@@ -3,101 +3,77 @@ package org.project.dao;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.project.configuration.SessionFactoryUtil;
+import org.project.dto.TripExportDto;
 import org.project.entity.*;
 import org.project.exceptions.EntityNotFoundException;
 import org.project.exceptions.InsufficientFundsException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Objects;
 
 public class TripDao {
-    public static void createCargoTrip(long companyId, long clientId, long employeeId,
-                                       long vehicleId, long qualificationId, CargoTrip cargoTrip) {
+
+    // in order to avoid repetitive code
+    private static <T extends Trip> void prepareAndPersistTrip(
+            long companyId,
+            long clientId,
+            long employeeId,
+            long vehicleId,
+            long qualificationId,
+            T trip
+    ) {
         try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
 
             Company company = session.find(Company.class, companyId);
-            if (company == null) throw new EntityNotFoundException("Company",  companyId);
+            if (company == null) throw new EntityNotFoundException("Company", companyId);
 
             Client client = session.find(Client.class, clientId);
-            if (client == null) throw new EntityNotFoundException("Client",  clientId);
+            if (client == null) throw new EntityNotFoundException("Client", clientId);
 
             Employee employee = session.find(Employee.class, employeeId);
-            if (employee == null) throw new EntityNotFoundException("Employee",  employeeId);
+            if (employee == null) throw new EntityNotFoundException("Employee", employeeId);
 
             Vehicle vehicle = session.find(Vehicle.class, vehicleId);
-            if (vehicle == null) throw new EntityNotFoundException("Vehicle",  vehicleId);
+            if (vehicle == null) throw new EntityNotFoundException("Vehicle", vehicleId);
 
             Qualification qualification = session.find(Qualification.class, qualificationId);
-            if (qualification == null) throw new EntityNotFoundException("Qualification",  qualificationId);
+            if (qualification == null) throw new EntityNotFoundException("Qualification", qualificationId);
 
-            if (employee.getCompany() == null ||
-                    employee.getCompany().getId() != companyId) {
+            // business checks
+            if (employee.getCompany() == null || employee.getCompany().getId() != companyId)
                 throw new IllegalStateException("Employee is not hired in this company!");
-            }
-            if (vehicle.getCompany() == null ||
-                    vehicle.getCompany().getId() != companyId) {
+
+            if (vehicle.getCompany() == null || vehicle.getCompany().getId() != companyId)
                 throw new IllegalStateException("Vehicle is not owned by this company!");
-            }
-            if (employee.getQualifications().stream().noneMatch(
-                                    qq -> Objects.equals(qq.getId(), qualificationId))) {
+
+            if (employee.getQualifications().stream()
+                    .noneMatch(q -> Objects.equals(q.getId(), qualificationId)))
                 throw new IllegalStateException("Employee doesn't have the required qualification!");
-            }
 
-            cargoTrip.assignCompany(company);
-            cargoTrip.assignClient(client);
-            cargoTrip.assignEmployee(employee);
-            cargoTrip.assignVehicle(vehicle);
-            cargoTrip.assignQualification(qualification);
+            // assign relations
+            trip.assignCompany(company);
+            trip.assignClient(client);
+            trip.assignEmployee(employee);
+            trip.assignVehicle(vehicle);
+            trip.assignQualification(qualification);
 
-            session.persist(cargoTrip);
+            session.persist(trip);
             transaction.commit();
         }
     }
 
+
+    public static void createCargoTrip(long companyId, long clientId, long employeeId,
+                                       long vehicleId, long qualificationId, CargoTrip cargoTrip) {
+        prepareAndPersistTrip(companyId, clientId, employeeId, vehicleId, qualificationId, cargoTrip);
+    }
+
     public static void createPassengerTrip(long companyId, long clientId, long employeeId,
                                            long vehicleId, long qualificationId, PassengerTrip passengerTrip) {
-        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
-            Transaction transaction = session.beginTransaction();
-
-            Company company = session.find(Company.class, companyId);
-            if (company == null) throw new EntityNotFoundException("Company",  companyId);
-
-            Client client = session.find(Client.class, clientId);
-            if (client == null) throw new EntityNotFoundException("Client",  clientId);
-
-            Employee employee = session.find(Employee.class, employeeId);
-            if (employee == null) throw new EntityNotFoundException("Employee",  employeeId);
-
-            Vehicle vehicle = session.find(Vehicle.class, vehicleId);
-            if (vehicle == null) throw new EntityNotFoundException("Vehicle",  vehicleId);
-
-            Qualification qualification = session.find(Qualification.class, qualificationId);
-            if (qualification == null) throw new EntityNotFoundException("Qualification",  qualificationId);
-
-            if (employee.getCompany() == null ||
-                    employee.getCompany().getId() != companyId) {
-                throw new IllegalStateException("Employee is not hired in this company!");
-            }
-            if (vehicle.getCompany() == null ||
-                    vehicle.getCompany().getId() != companyId) {
-                throw new IllegalStateException("Vehicle is not owned by this company!");
-            }
-            if (employee.getQualifications().stream().noneMatch(
-                    qq -> Objects.equals(qq.getId(), qualificationId))) {
-                throw new IllegalStateException("Employee doesn't have the required qualification!");
-            }
-
-            passengerTrip.assignCompany(company);
-            passengerTrip.assignClient(client);
-            passengerTrip.assignEmployee(employee);
-            passengerTrip.assignVehicle(vehicle);
-            passengerTrip.assignQualification(qualification);
-
-            session.persist(passengerTrip);
-            transaction.commit();
-        }
+        prepareAndPersistTrip(companyId, clientId, employeeId, vehicleId, qualificationId, passengerTrip);
     }
 
     public static Trip getTrip (long id) {
@@ -127,6 +103,12 @@ public class TripDao {
 
             session.persist(trip1);
             transaction.commit();
+        }
+    }
+
+    public static List<Trip> getTrips() {
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            return session.createQuery("SELECT t FROM Trip t", Trip.class).getResultList();
         }
     }
 
@@ -169,7 +151,11 @@ public class TripDao {
                 throw new InsufficientFundsException(client.getResources(), finalPrice);
             }
 
-            client.setResources(client.getResources().subtract(finalPrice));
+            client.setResources(
+                    client.getResources()
+                            .subtract(finalPrice)
+                            .setScale(2, RoundingMode.HALF_UP)
+            );
             trip.setPaid(true);
             transaction.commit();
         }
@@ -182,6 +168,28 @@ public class TripDao {
                     Trip.class)
                     .setParameter("end", endLoc)
                     .getResultList();
+        }
+    }
+
+    // mapping to TripExportDto for the file export
+    public static List<TripExportDto> getTripsForExport() {
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+            return session.createQuery("SELECT t FROM Trip t", Trip.class)
+                    .getResultList()
+                    .stream()
+                    .map(t -> new TripExportDto(
+                            t.getId(),
+                            t instanceof CargoTrip ? "CARGO" : "PASSENGER",
+                            t.getStartLoc(),
+                            t.getEndLoc(),
+                            t.calculateFinalPrice(),
+                            t.getDeparture(),
+                            t.getArrival(),
+                            t.getEmployee().getFname() + " " + t.getEmployee().getLname(),
+                            t.getVehicle().getType().name(),
+                            t.isPaid()
+                    ))
+                    .toList();
         }
     }
 }

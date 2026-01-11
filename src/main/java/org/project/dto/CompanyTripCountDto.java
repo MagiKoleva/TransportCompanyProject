@@ -1,5 +1,6 @@
 package org.project.dto;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -17,5 +18,6 @@ public class CompanyTripCountDto {
     @Pattern(regexp = "^([A-Z]).*", message = "Company name has to start with a capital letter!")
     private String companyName;
 
+    @Min(value = 0, message = "Value cannot be less than 0!")
     private long tripCount;
 }

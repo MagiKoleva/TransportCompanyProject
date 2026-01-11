@@ -133,7 +133,12 @@ public class CompanyDao {
     }
 
     public static List<CompanyTripPaymentReportDto> getCompanyTripPaymentReport() {
-        return getCompanies().stream()
+        try (Session session = SessionFactoryUtil.getSessionFactory().openSession()) {
+
+            List<Company> companies =
+                    session.createQuery("FROM Company", Company.class).getResultList();
+
+        return companies.stream()
                 .map(c -> {
                     BigDecimal paidSum = c.getTrips().stream()
                             .filter(Trip::isPaid)
@@ -151,6 +156,7 @@ public class CompanyDao {
                         .comparing(CompanyTripPaymentReportDto::getTotalFinalPaidSum)
                         .reversed())
                 .toList();
+        }
     }
 
     public static BigDecimal getCompanyPaidIncomeForGivenPeriod(long companyId,

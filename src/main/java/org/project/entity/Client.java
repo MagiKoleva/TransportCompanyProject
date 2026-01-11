@@ -3,6 +3,7 @@ package org.project.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.util.HashSet;
@@ -15,7 +16,7 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString(callSuper = true)
-@Builder
+@SuperBuilder
 public class Client extends BaseEntity {
 
     @Column(name = "name")

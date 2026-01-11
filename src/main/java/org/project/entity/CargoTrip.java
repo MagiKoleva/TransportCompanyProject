@@ -8,18 +8,21 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Entity
 @Table(name = "cargo_trip")
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @ToString(callSuper = true)
 @DiscriminatorValue("cargo")
+@SuperBuilder
 public class CargoTrip extends Trip {
 
     @Column(name = "weight")
@@ -37,8 +40,19 @@ public class CargoTrip extends Trip {
 
     @Override
     public BigDecimal calculateFinalPrice() {
-        return getPrice().add(
-                getPrice().multiply(percent).divide(BigDecimal.valueOf(100))
-        );
+        BigDecimal result = getPrice();
+
+        if (this instanceof CargoTrip cargo) {
+            BigDecimal increment = cargo.getPrice()
+                    .multiply(cargo.getPercent())
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            result = result.add(increment);
+        }
+
+        return result.setScale(2, RoundingMode.HALF_UP);
+
+//        return getPrice().add(
+//                getPrice().multiply(percent).divide(BigDecimal.valueOf(100))
+//        );
     }
 }

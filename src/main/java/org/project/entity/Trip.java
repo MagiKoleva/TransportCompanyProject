@@ -2,10 +2,8 @@ package org.project.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.project.validator.DifferentLocations;
 import org.project.validator.ValidTripDates;
 
@@ -14,9 +12,12 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "trip")
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @ToString(callSuper = true)
+@SuperBuilder
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "dType", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("trip")
@@ -25,11 +26,11 @@ import java.time.LocalDate;
 public class Trip extends BaseEntity {
 
     @Column(name = "start_location")
-    @NotBlank(message = "Start locations must be provided!")
+    @NotBlank(message = "Start location must be provided!")
     private String startLoc;
 
     @Column(name = "end_location")
-    @NotBlank(message = "End locations must be provided!")
+    @NotBlank(message = "End location must be provided!")
     private String endLoc;
 
     @Column(name = "departure_date")
